@@ -8,7 +8,7 @@ import LocationSummary from './LocationSummary';
 import PeriodStat from './PeriodStat';
 
 interface ILocationStatProps {
-  changeYear: (_year: string) => void;
+  changeYear: (_year: string, _typ: string) => void;
   changeCity: (_city: string) => void;
   changeTitle: (_title: string) => void;
 }

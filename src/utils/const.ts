@@ -47,7 +47,7 @@ const LIGHTS_ON =false;
 //set to `true` if you want to show the 'Elevation Gain' column
 const SHOW_ELEVATION_GAIN = false;
 // richer title for the activity types (like garmin style)
-const RICH_TITLE = false;
+const RICH_TITLE = false; // 徒步不受该参数控制，一直显示原始数据名称
 
 // IF you outside China please make sure IS_CHINESE = false
 const IS_CHINESE = true;
@@ -148,7 +148,7 @@ export {
   ACTIVITY_TOTAL
 };
 
-const nike = 'rgb(224,237,94)'; // if you want change the main color change here src/styles/variables.scss
+const nike = '#eeeeee'; // if you want change the main color change here src/styles/variables.scss
 const dark_vanilla = 'rgb(228,212,220)';
 
 // If your map has an offset please change this line
@@ -158,9 +158,9 @@ export const MAIN_COLOR = nike;
 export const PROVINCE_FILL_COLOR = '#47b8e0';
 export const COUNTRY_FILL_COLOR = dark_vanilla;
 
-export const RUN_COLOR = MAIN_COLOR;
+export const RUN_COLOR = 'rgb(224,237,94)';
 export const RUN_TRAIL_COLOR = 'rgb(255,153,51)';
 export const CYCLING_COLOR = 'rgb(51,255,87)';
 export const HIKING_COLOR = 'rgb(151,51,255)';
-export const WALKING_COLOR = HIKING_COLOR;
+export const WALKING_COLOR = 'rgb(122,197,205)';
 export const SWIMMING_COLOR = 'rgb(255,51,51)';

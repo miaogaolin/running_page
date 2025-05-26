@@ -289,7 +289,7 @@ const getActivitySport = (act: Activity): string => {
 }
 
 const titleForRun = (run: Activity): string => {
-  if (RICH_TITLE) {
+  if (RICH_TITLE || run.type === 'hiking') {
     // 1. try to use user defined name
     if (run.name != '') {
       return run.name;
@@ -367,9 +367,24 @@ const getBoundsForGeoData = (
   return { longitude, latitude, zoom };
 };
 
-const filterYearRuns = (run: Activity, year: string) => {
+const filterYearRuns = (run: Activity, year: string, activityType: string) => {
   if (run && run.start_date_local) {
-    return run.start_date_local.slice(0, 4) === year;
+    if (!activityType) {
+      activityType = '';
+    }
+    let isFilterYear = year.length > 0 && run.start_date_local.slice(0, 4) === year;
+    let isFilterType =  activityType.length > 0  && run.type === activityType;
+    switch(true) {
+      case year.length == 0 && activityType && activityType.length == 0:
+        return false;
+      case year.length > 0 && activityType.length > 0:
+        return isFilterYear && isFilterType;
+      case year.length > 0:
+        return isFilterYear;
+      case activityType.length > 0 :
+        return isFilterType;
+    }
+
   }
   return false;
 };
@@ -386,12 +401,13 @@ const filterTitleRuns = (run: Activity, title: string) =>
 const filterAndSortRuns = (
   activities: Activity[],
   item: string,
-  filterFunc: (_run: Activity, _bvalue: string) => boolean,
+  activityType: string,
+  filterFunc: (_run: Activity, _bvalue: string, _activityType: string) => boolean,
   sortFunc: (_a: Activity, _b: Activity) => number
 ) => {
   let s = activities;
   if (item !== 'Total') {
-    s = activities.filter((run) => filterFunc(run, item));
+    s = activities.filter((run) => filterFunc(run, item, activityType));
   }
   return s.sort(sortFunc);
 };
@@ -423,4 +439,5 @@ export {
   getBoundsForGeoData,
   formatRunTime,
   convertMovingTime2Sec,
+  colorForRun,
 };

@@ -1,21 +1,22 @@
 import { lazy, Suspense } from 'react';
 import Stat from '@/components/Stat';
 import useActivities from '@/hooks/useActivities';
-import { formatPace } from '@/utils/utils';
+import { formatPace,filterYearRuns } from '@/utils/utils';
 import useHover from '@/hooks/useHover';
 import { yearStats } from '@assets/index';
 import { loadSvgComponent } from '@/utils/svgUtils';
 import { SHOW_ELEVATION_GAIN } from "@/utils/const";
 
-const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string) => void }) => {
+const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _typ: string) => void }) => {
   let { activities: runs, years } = useActivities();
   // for hover
   const [hovered, eventHandlers] = useHover();
   // lazy Component
   const YearSVG = lazy(() => loadSvgComponent(yearStats, `./year_${year}.svg`));
 
+  let activityType = '';
   if (years.includes(year)) {
-    runs = runs.filter((run) => run.start_date_local.slice(0, 4) === year);
+    runs = runs.filter((run) =>filterYearRuns(run, year, activityType) );
   }
   let sumDistance = 0;
   let streak = 0;
@@ -26,7 +27,9 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string) =>
   let heartRateNullCount = 0;
   let totalMetersAvail = 0;
   let totalSecondsAvail = 0;
+  let data = new Map<string,number>();
   runs.forEach((run) => {
+    data.set(run.type, (data.get(run.type) || 0) + run.distance);
     sumDistance += run.distance || 0;
     sumElevationGain += run.elevation_gain || 0;
     if (run.average_speed) {
@@ -45,7 +48,7 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string) =>
       streak = Math.max(streak, run.streak);
     }
   });
-  sumDistance = parseFloat((sumDistance / 1000.0).toFixed(1));
+  sumDistance = parseFloat((sumDistance / 1000.0).toFixed(2));
   sumElevationGain = (sumElevationGain).toFixed(0);
   const avgPace = formatPace(totalMetersAvail / totalSecondsAvail);
   const hasHeartRate = !(heartRate === 0);
@@ -55,25 +58,15 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string) =>
   return (
     <div
       className="cursor-pointer"
-      onClick={() => onClick(year)}
       {...eventHandlers}
     >
       <section>
-        <Stat value={year} description=" Journey" />
-        <Stat value={runs.length} description=" Runs" />
-        <Stat value={sumDistance} description=" KM" />
-        {SHOW_ELEVATION_GAIN && <Stat value={sumElevationGain} description=" Elevation Gain" />}
-        <Stat value={avgPace} description=" Avg Pace" />
+        <Stat value={year} description={` ${sumDistance} KM`} onClick={() => onClick(year, '')}/>
+        {Array.from(data.entries()).map(([key, value]) => (
+             <Stat value={key} description={` ${(value/1000).toFixed(2)} KM`} onClick={() => onClick(year, key)}/>
+        ))}
         <Stat value={`${streak} day`} description=" Streak" />
-        {hasHeartRate && (
-          <Stat value={avgHeartRate} description=" Avg Heart Rate" />
-        )}
       </section>
-      {year !== 'Total' && hovered && (
-        <Suspense fallback="loading...">
-          <YearSVG className="my-4 h-4/6 w-4/6 border-0 p-0" />
-        </Suspense>
-      )}
       <hr color="red" />
     </div>
   );

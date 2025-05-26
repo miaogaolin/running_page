@@ -30,7 +30,7 @@ const Index = () => {
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
   const [runs, setActivity] = useState(
-    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
+    filterAndSortRuns(activities, year, '', filterYearRuns, sortDateFunc)
   );
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
@@ -45,18 +45,19 @@ const Index = () => {
   const changeByItem = (
     item: string,
     name: string,
-    func: (_run: Activity, _value: string) => boolean
+    activityType: string,
+    func: (_run: Activity, _value: string, _activityType: string) => boolean
   ) => {
     scrollToMap();
     if (name != 'Year') {
       setYear(thisYear);
     }
-    setActivity(filterAndSortRuns(activities, item, func, sortDateFunc));
+    setActivity(filterAndSortRuns(activities, item, activityType, func, sortDateFunc));
     setRunIndex(-1);
     setTitle(`${item} ${name} Running Heatmap`);
   };
 
-  const changeYear = (y: string) => {
+  const changeYear = (y: string, typ: string) => {
     // default year
     setYear(y);
 
@@ -66,16 +67,16 @@ const Index = () => {
       });
     }
 
-    changeByItem(y, 'Year', filterYearRuns);
+    changeByItem(y, 'Year', typ, filterYearRuns);
     clearInterval(intervalId);
   };
 
   const changeCity = (city: string) => {
-    changeByItem(city, 'City', filterCityRuns);
+    changeByItem(city, 'City', '', filterCityRuns);
   };
 
   const changeTitle = (title: string) => {
-    changeByItem(title, 'Title', filterTitleRuns);
+    changeByItem(title, 'Title', '', filterTitleRuns);
   };
 
   const locateActivity = (runIds: RunIds) => {

@@ -1,4 +1,4 @@
-import { formatPace, titleForRun, formatRunTime, Activity, RunIds } from '@/utils/utils';
+import { formatPace, titleForRun, formatRunTime, Activity, RunIds, colorForRun } from '@/utils/utils';
 import { SHOW_ELEVATION_GAIN } from '@/utils/const';
 import styles from './style.module.css';
 
@@ -31,6 +31,7 @@ const RunRow = ({ elementIndex, locateActivity, run, runIndex, setRunIndex }: IR
       className={`${styles.runRow} ${runIndex === elementIndex ? styles.selected : ''}`}
       key={run.start_date_local}
       onClick={handleClick}
+      style={{color: colorForRun(run)}}
     >
       <td>{titleForRun(run)}</td>
       <td>{distance}</td>
