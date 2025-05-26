@@ -47,7 +47,7 @@ const LIGHTS_ON =false;
 //set to `true` if you want to show the 'Elevation Gain' column
 const SHOW_ELEVATION_GAIN = false;
 // richer title for the activity types (like garmin style)
-const RICH_TITLE = false; // 徒步不受该参数控制，一直显示原始数据名称
+const RICH_TITLE = false; // 该配置只给跑步使用，其它活动只显示活动文件原始名称
 
 // IF you outside China please make sure IS_CHINESE = false
 const IS_CHINESE = true;

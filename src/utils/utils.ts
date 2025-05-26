@@ -289,7 +289,7 @@ const getActivitySport = (act: Activity): string => {
 }
 
 const titleForRun = (run: Activity): string => {
-  if (RICH_TITLE || run.type === 'hiking') {
+  if (RICH_TITLE || run.type != 'Run') {
     // 1. try to use user defined name
     if (run.name != '') {
       return run.name;
