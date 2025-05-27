@@ -74,11 +74,11 @@ class Coros:
         dictName = "ACTIVITY_LIST"
         if self.is_cn:
             dictName = "ACTIVITY_LIST_CN"
+        idNames = {}
         while True:
             url = f"{COROS_URL_DICT.get(dictName)}&pageNumber={page_number}&size=20"
             response = await self.req.get(url)
             data = response.json()
-            print(data, self.req.headers)
             activities = data.get("data", {}).get("dataList", None)
             if not activities:
                 break
@@ -86,11 +86,12 @@ class Coros:
                 label_id = activity["labelId"]
                 if label_id is None:
                     continue
+                idNames[label_id] = activity["name"]
                 all_activities_ids.append(label_id)
 
             page_number += 1
 
-        return all_activities_ids
+        return all_activities_ids, idNames
 
     async def download_activity(self, label_id):
         download_folder = FIT_FOLDER
@@ -147,7 +148,7 @@ async def download_and_generate(
     downloaded_ids = get_downloaded_ids(folder)
     coros = Coros(account, password, with_download_gpx, is_cn)
     await coros.init()
-    activity_ids = await coros.fetch_activity_ids()
+    activity_ids, idNames = await coros.fetch_activity_ids()
     print("activity_ids: ", len(activity_ids))
     print("downloaded_ids: ", len(downloaded_ids))
     to_generate_coros_ids = list(set(activity_ids) - set(downloaded_ids))
@@ -160,7 +161,7 @@ async def download_and_generate(
     )
     print(f"Download finished. Elapsed {time.time() - start_time} seconds")
     await coros.req.aclose()
-    make_activities_file(SQL_FILE, folder, JSON_FILE, ext)
+    make_activities_file(SQL_FILE, folder, JSON_FILE, ext, idNames)
 
 
 async def gather_with_concurrency(n, tasks):
