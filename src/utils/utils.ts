@@ -289,10 +289,6 @@ const getActivitySport = (act: Activity): string => {
 }
 
 const titleForRun = (run: Activity): string => {
-  if (run.start_date.indexOf("2025-05-24") >= 0) {
-
-    console.log(run.type, run.name, run.start_date)
-  }
   if (RICH_TITLE || run.type != 'Run') {
     // 1. try to use user defined name
     if (run.name != '') {
