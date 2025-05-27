@@ -313,7 +313,7 @@ const titleForRun = (run: Activity): string => {
     return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
   }
   if (runHour >= 0 && runHour <= 10) {
-    return RUN_TITLES.MORNING_RUN_TITLE + " " + run.type;
+    return RUN_TITLES.MORNING_RUN_TITLE;
   }
   if (runHour > 10 && runHour <= 14) {
     return RUN_TITLES.MIDDAY_RUN_TITLE;
@@ -374,12 +374,19 @@ const filterYearRuns = (run: Activity, year: string, activityType: string) => {
     if (!activityType) {
       activityType = '';
     }
+    if (year == "Total") {
+      year = '';
+    }
     let isFilterYear = year.length > 0 && run.start_date_local.slice(0, 4) === year;
     let isFilterType =  activityType.length > 0  && run.type === activityType;
+    if (year == '') {
+    console.log(isFilterYear, isFilterType);
+    }
     switch(true) {
       case year.length == 0 && activityType && activityType.length == 0:
         return false;
       case year.length > 0 && activityType.length > 0:
+        console.log(run, activityType, isFilterYear && isFilterType);
         return isFilterYear && isFilterType;
       case year.length > 0:
         return isFilterYear;
@@ -408,7 +415,7 @@ const filterAndSortRuns = (
   sortFunc: (_a: Activity, _b: Activity) => number
 ) => {
   let s = activities;
-  if (item !== 'Total') {
+  if (item !== 'Total' || activityType != '') {
     s = activities.filter((run) => filterFunc(run, item, activityType));
   }
   return s.sort(sortFunc);
