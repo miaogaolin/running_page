@@ -200,7 +200,7 @@ const Index = () => {
           changeYear={changeYear}
           thisYear={year}
         />
-        {year === 'Total' && typ === ''? (
+        {year === 'Total' && (typ === '' || !typ)? (
           <SVGStat />
         ) : (
           <RunTable
