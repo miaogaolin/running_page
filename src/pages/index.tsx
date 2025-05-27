@@ -71,7 +71,6 @@ const Index = () => {
       });
     }
 
-    console.log(year, typ);
     changeByItem(y, 'Year', typ, filterYearRuns);
     clearInterval(intervalId);
   };

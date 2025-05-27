@@ -379,14 +379,10 @@ const filterYearRuns = (run: Activity, year: string, activityType: string) => {
     }
     let isFilterYear = year.length > 0 && run.start_date_local.slice(0, 4) === year;
     let isFilterType =  activityType.length > 0  && run.type === activityType;
-    if (year == '') {
-    console.log(isFilterYear, isFilterType);
-    }
     switch(true) {
       case year.length == 0 && activityType && activityType.length == 0:
         return false;
       case year.length > 0 && activityType.length > 0:
-        console.log(run, activityType, isFilterYear && isFilterType);
         return isFilterYear && isFilterType;
       case year.length > 0:
         return isFilterYear;
