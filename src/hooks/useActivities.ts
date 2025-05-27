@@ -13,8 +13,8 @@ const useActivities = () => {
     const location = locationForRun(run);
 
     const periodName = titleForRun(run);
-    // 有修改过运动名称
-    if (periodName && run.name != periodName) {
+    // 仅跑步
+    if (periodName && run.type == "Run") {
       runPeriod[periodName] = runPeriod[periodName]
         ? runPeriod[periodName] + 1
         : 1;

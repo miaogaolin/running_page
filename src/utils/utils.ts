@@ -289,6 +289,10 @@ const getActivitySport = (act: Activity): string => {
 }
 
 const titleForRun = (run: Activity): string => {
+  if (run.start_date.indexOf("2025-05-24") >= 0) {
+
+    console.log(run.type, run.name, run.start_date)
+  }
   if (RICH_TITLE || run.type != 'Run') {
     // 1. try to use user defined name
     if (run.name != '') {
@@ -299,19 +303,21 @@ const titleForRun = (run: Activity): string => {
     const activity_sport = getActivitySport(run);
     if (city && city.length > 0 && activity_sport.length > 0) {
       return `${city} ${activity_sport}`;
+    } else {
+      return 'Untitled '+ run.type
     }
   }
   // 3. use time+length if location or type is not available
   const runDistance = run.distance / 1000;
   const runHour = +run.start_date_local.slice(11, 13);
-  if (runDistance > 20 && runDistance < 40) {
+  if (run.runDistance > 20 && runDistance < 40) {
     return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
   }
   if (runDistance >= 40) {
     return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
   }
   if (runHour >= 0 && runHour <= 10) {
-    return RUN_TITLES.MORNING_RUN_TITLE;
+    return RUN_TITLES.MORNING_RUN_TITLE + " " + run.type;
   }
   if (runHour > 10 && runHour <= 14) {
     return RUN_TITLES.MIDDAY_RUN_TITLE;

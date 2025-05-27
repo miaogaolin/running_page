@@ -7,24 +7,28 @@ import time
 import aiofiles
 import httpx
 
-from config import JSON_FILE, SQL_FILE, FIT_FOLDER
+from config import GPX_FOLDER, JSON_FILE, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
 COROS_URL_DICT = {
-    "LOGIN_URL": "https://teamcnapi.coros.com/account/login",
-    "DOWNLOAD_URL": "https://teamcnapi.coros.com/activity/detail/download",
-    "ACTIVITY_LIST": "https://teamcnapi.coros.com/activity/query?&modeList=",
+    "LOGIN_URL": "https://teamapi.coros.com/account/login",
+    "DOWNLOAD_URL": "https://teamapi.coros.com/activity/detail/download",
+    "ACTIVITY_LIST": "https://teamapi.coros.com/activity/query?&modeList=",
+    "DOWNLOAD_URL_CN": "https://teamcnapi.coros.com/activity/detail/download",
+    "ACTIVITY_LIST_CN": "https://teamcnapi.coros.com/activity/query?&modeList=",
 }
 
 TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 
 
 class Coros:
-    def __init__(self, account, password):
+    def __init__(self, account, password, with_download_gpx=False, is_cn=False):
         self.account = account
         self.password = password
         self.headers = None
         self.req = None
+        self.is_cn = is_cn
+        self.with_download_gpx = with_download_gpx
 
     async def login(self):
         url = COROS_URL_DICT.get("LOGIN_URL")
@@ -67,10 +71,14 @@ class Coros:
         page_number = 1
         all_activities_ids = []
 
+        dictName = "ACTIVITY_LIST"
+        if self.is_cn:
+            dictName = "ACTIVITY_LIST_CN"
         while True:
-            url = f"{COROS_URL_DICT.get('ACTIVITY_LIST')}&pageNumber={page_number}&size=20"
+            url = f"{COROS_URL_DICT.get(dictName)}&pageNumber={page_number}&size=20"
             response = await self.req.get(url)
             data = response.json()
+            print(data, self.req.headers)
             activities = data.get("data", {}).get("dataList", None)
             if not activities:
                 break
@@ -86,7 +94,15 @@ class Coros:
 
     async def download_activity(self, label_id):
         download_folder = FIT_FOLDER
-        download_url = f"{COROS_URL_DICT.get('DOWNLOAD_URL')}?labelId={label_id}&sportType=100&fileType=4"
+        dictName = "DOWNLOAD_URL"
+        if self.is_cn:
+            dictName = "DOWNLOAD_URL_CN"
+        fileType = 4
+        if self.with_download_gpx:
+            fileType = 1
+            download_folder = GPX_FOLDER
+        download_url = f"{COROS_URL_DICT.get(dictName)}?labelId={label_id}&sportType=100&fileType={fileType}"
+
         file_url = None
         try:
             response = await self.req.post(download_url)
@@ -120,12 +136,17 @@ def get_downloaded_ids(folder):
     return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
 
 
-async def download_and_generate(account, password):
+async def download_and_generate(
+    account, password, with_download_gpx=False, is_cn=False
+):
     folder = FIT_FOLDER
+    ext = "fit"
+    if with_download_gpx:
+        folder = GPX_FOLDER
+        ext = "gpx"
     downloaded_ids = get_downloaded_ids(folder)
-    coros = Coros(account, password)
+    coros = Coros(account, password, with_download_gpx, is_cn)
     await coros.init()
-
     activity_ids = await coros.fetch_activity_ids()
     print("activity_ids: ", len(activity_ids))
     print("downloaded_ids: ", len(downloaded_ids))
@@ -137,9 +158,9 @@ async def download_and_generate(account, password):
         10,
         [coros.download_activity(label_d) for label_d in to_generate_coros_ids],
     )
-    print(f"Download finished. Elapsed {time.time()-start_time} seconds")
+    print(f"Download finished. Elapsed {time.time() - start_time} seconds")
     await coros.req.aclose()
-    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit")
+    make_activities_file(SQL_FILE, folder, JSON_FILE, ext)
 
 
 async def gather_with_concurrency(n, tasks):
@@ -157,10 +178,25 @@ if __name__ == "__main__":
     parser.add_argument("account", nargs="?", help="input coros account")
 
     parser.add_argument("password", nargs="?", help="input coros password")
-    options = parser.parse_args()
 
+    parser.add_argument(
+        "--with-gpx",
+        dest="with_gpx",
+        action="store_true",
+        help="get all coros data to gpx and download",
+    )
+
+    parser.add_argument(
+        "--is-cn",
+        dest="is_cn",
+        action="store_true",
+        help="if coros account is cn",
+    )
+    options = parser.parse_args()
     account = options.account
     password = options.password
     encrypted_pwd = hashlib.md5(password.encode()).hexdigest()
 
-    asyncio.run(download_and_generate(account, encrypted_pwd))
+    asyncio.run(
+        download_and_generate(account, encrypted_pwd, options.with_gpx, options.is_cn)
+    )
