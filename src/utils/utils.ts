@@ -65,13 +65,22 @@ const convertMovingTime2Sec = (moving_time: string): number => {
 
 const formatRunTime = (moving_time: string): string => {
   const totalSeconds = convertMovingTime2Sec(moving_time);
-  const seconds = totalSeconds % 60;
-  const minutes = (totalSeconds - seconds) / 60;
+  const seconds = Math.floor(totalSeconds % 60);
+  const minutes = Math.floor((totalSeconds - seconds) / 60);
   if (minutes === 0) {
-    return seconds + 's';
+    return padZero(seconds) ;
+  } else if (minutes < 60){
+    return padZero(minutes) + ':' + padZero(seconds);
+  } else if (minutes >= 60) {
+    const hour = Math.floor(minutes /60);
+    const minute = Math.floor(minutes % 61);
+    return padZero(hour) + ':' + padZero(minute) + ':' + padZero(seconds)
   }
-  return minutes + 'min';
+  return 0;
 };
+const padZero = (num: number): string => {
+  return num.toString().padStart(2, '0');
+}
 
 // for scroll to the map
 const scrollToMap = () => {
