@@ -5,7 +5,7 @@ import { formatPace,filterYearRuns } from '@/utils/utils';
 import useHover from '@/hooks/useHover';
 import { yearStats } from '@assets/index';
 import { loadSvgComponent } from '@/utils/svgUtils';
-import { SHOW_ELEVATION_GAIN } from "@/utils/const";
+import { SHOW_ELEVATION_GAIN } from '@/utils/const';
 
 const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _typ: string) => void }) => {
   let { activities: runs, years } = useActivities();
