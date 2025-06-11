@@ -465,6 +465,9 @@ const getMapStyle = (vendor: string, styleName: string, token: string) => {
   return style;
 };
 
+const isTouchDevice = () =>
+  'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 export {
   titleForShow,
   formatPace,
@@ -486,4 +489,5 @@ export {
   convertMovingTime2Sec,
   colorForRun,
   getMapStyle,
+  isTouchDevice,
 };
