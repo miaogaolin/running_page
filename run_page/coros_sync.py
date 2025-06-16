@@ -22,7 +22,7 @@ TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 
 
 class Coros:
-    def __init__(self, account, password, with_download_gpx=False, is_cn=False):
+    def __init__(self, account, password, is_only_running=False):
         self.account = account
         self.password = password
         self.headers = None
@@ -61,13 +61,14 @@ class Coros:
                 "accesstoken": access_token,
                 "cookie": f"CPL-coros-region=2; CPL-coros-token={access_token}",
             }
+            self.is_only_running = is_only_running
             self.req = httpx.AsyncClient(timeout=TIME_OUT, headers=self.headers)
         await client.aclose()
 
     async def init(self):
         await self.login()
 
-    async def fetch_activity_ids(self):
+    async def fetch_activity_ids(self, only_run):
         page_number = 1
         all_activities_ids = []
 
@@ -75,8 +76,9 @@ class Coros:
         if self.is_cn:
             dictName = "ACTIVITY_LIST_CN"
         idNames = {}
+        mode_list_str = "100,101,102,103" if only_run else ""
         while True:
-            url = f"{COROS_URL_DICT.get(dictName)}&pageNumber={page_number}&size=20"
+            url = f"{COROS_URL_DICT.get(dictName)}?&modeList={mode_list_str}&pageNumber={page_number}&size=20"
             response = await self.req.get(url)
             data = response.json()
             activities = data.get("data", {}).get("dataList", None)
@@ -181,6 +183,14 @@ if __name__ == "__main__":
     parser.add_argument("password", nargs="?", help="input coros password")
 
     parser.add_argument(
+        "--only-run",
+        dest="only_run",
+        action="store_true",
+        help="if is only for running",
+    )
+    options = parser.parse_args()
+
+    parser.add_argument(
         "--with-gpx",
         dest="with_gpx",
         action="store_true",
@@ -196,6 +206,7 @@ if __name__ == "__main__":
     options = parser.parse_args()
     account = options.account
     password = options.password
+    is_only_running = options.only_run
     encrypted_pwd = hashlib.md5(password.encode()).hexdigest()
 
     asyncio.run(
