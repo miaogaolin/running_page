@@ -22,7 +22,14 @@ TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 
 
 class Coros:
-    def __init__(self, account, password, is_only_running=False):
+    def __init__(
+        self,
+        account,
+        password,
+        with_download_gpx=False,
+        is_cn=False,
+        is_only_running=False,
+    ):
         self.account = account
         self.password = password
         self.headers = None
@@ -140,7 +147,7 @@ def get_downloaded_ids(folder):
 
 
 async def download_and_generate(
-    account, password, with_download_gpx=False, is_cn=False
+    account, password, with_download_gpx=False, is_cn=False, only_run=False
 ):
     folder = FIT_FOLDER
     ext = "fit"
@@ -150,7 +157,7 @@ async def download_and_generate(
     downloaded_ids = get_downloaded_ids(folder)
     coros = Coros(account, password, with_download_gpx, is_cn)
     await coros.init()
-    activity_ids, idNames = await coros.fetch_activity_ids()
+    activity_ids, idNames = await coros.fetch_activity_ids(only_run=only_run)
     print("activity_ids: ", len(activity_ids))
     print("downloaded_ids: ", len(downloaded_ids))
     to_generate_coros_ids = list(set(activity_ids) - set(downloaded_ids))
@@ -210,5 +217,7 @@ if __name__ == "__main__":
     encrypted_pwd = hashlib.md5(password.encode()).hexdigest()
 
     asyncio.run(
-        download_and_generate(account, encrypted_pwd, options.with_gpx, options.is_cn)
+        download_and_generate(
+            account, encrypted_pwd, options.with_gpx, options.is_cn, is_only_running
+        )
     )
