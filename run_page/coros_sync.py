@@ -7,7 +7,7 @@ import time
 import aiofiles
 import httpx
 
-from config import GPX_FOLDER, JSON_FILE, SQL_FILE, FIT_FOLDER
+from config import JSON_FILE, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
 COROS_URL_DICT = {
@@ -26,7 +26,6 @@ class Coros:
         self,
         account,
         password,
-        with_download_gpx=False,
         is_cn=False,
         is_only_running=False,
     ):
@@ -35,7 +34,6 @@ class Coros:
         self.headers = None
         self.req = None
         self.is_cn = is_cn
-        self.with_download_gpx = with_download_gpx
 
     async def login(self):
         url = COROS_URL_DICT.get("LOGIN_URL")
@@ -108,9 +106,6 @@ class Coros:
         if self.is_cn:
             dictName = "DOWNLOAD_URL_CN"
         fileType = 4
-        if self.with_download_gpx:
-            fileType = 1
-            download_folder = GPX_FOLDER
         download_url = f"{COROS_URL_DICT.get(dictName)}?labelId={label_id}&sportType=100&fileType={fileType}"
 
         file_url = None
@@ -146,16 +141,11 @@ def get_downloaded_ids(folder):
     return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
 
 
-async def download_and_generate(
-    account, password, with_download_gpx=False, is_cn=False, only_run=False
-):
+async def download_and_generate(account, password, is_cn=False, only_run=False):
     folder = FIT_FOLDER
     ext = "fit"
-    if with_download_gpx:
-        folder = GPX_FOLDER
-        ext = "gpx"
     downloaded_ids = get_downloaded_ids(folder)
-    coros = Coros(account, password, with_download_gpx, is_cn)
+    coros = Coros(account, password, is_cn)
     await coros.init()
     activity_ids, idNames = await coros.fetch_activity_ids(only_run=only_run)
     print("activity_ids: ", len(activity_ids))
@@ -198,13 +188,6 @@ if __name__ == "__main__":
     options = parser.parse_args()
 
     parser.add_argument(
-        "--with-gpx",
-        dest="with_gpx",
-        action="store_true",
-        help="get all coros data to gpx and download",
-    )
-
-    parser.add_argument(
         "--is-cn",
         dest="is_cn",
         action="store_true",
@@ -217,7 +200,5 @@ if __name__ == "__main__":
     encrypted_pwd = hashlib.md5(password.encode()).hexdigest()
 
     asyncio.run(
-        download_and_generate(
-            account, encrypted_pwd, options.with_gpx, options.is_cn, is_only_running
-        )
+        download_and_generate(account, encrypted_pwd, options.is_cn, is_only_running)
     )
