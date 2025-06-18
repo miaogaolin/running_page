@@ -7,7 +7,7 @@ import time
 import aiofiles
 import httpx
 
-from config import JSON_FILE, SQL_FILE, FIT_FOLDER
+from config import JSON_FILE, SQL_FILE, FOLDER_DICT
 from utils import make_activities_file
 
 COROS_URL_DICT = {
@@ -17,6 +17,13 @@ COROS_URL_DICT = {
     "DOWNLOAD_URL_CN": "https://teamcnapi.coros.com/activity/detail/download",
     "ACTIVITY_LIST_CN": "https://teamcnapi.coros.com/activity/query",
 }
+
+COROS_TYPE_DICT = {
+    "gpx": 1,
+    "fit": 4,
+    "tcx": 3,
+}
+
 
 TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 
@@ -73,9 +80,9 @@ class Coros:
     async def init(self):
         await self.login()
 
-    async def fetch_activity_ids(self, only_run):
+    async def fetch_activity_ids_types(self, only_run):
         page_number = 1
-        all_activities_ids = []
+        all_activities_ids_types = []
 
         dictName = "ACTIVITY_LIST"
         if self.is_cn:
@@ -91,14 +98,15 @@ class Coros:
                 break
             for activity in activities:
                 label_id = activity["labelId"]
+                sport_type = activity["sportType"]
                 if label_id is None:
                     continue
                 idNames[label_id] = activity["name"]
-                all_activities_ids.append(label_id)
+                all_activities_ids_types.append([label_id, sport_type])
 
             page_number += 1
 
-        return all_activities_ids, idNames
+        return all_activities_ids_types, idNames
 
     async def download_activity(self, label_id):
         download_folder = FIT_FOLDER
@@ -141,13 +149,15 @@ def get_downloaded_ids(folder):
     return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
 
 
-async def download_and_generate(account, password, is_cn=False, only_run=False):
-    folder = FIT_FOLDER
-    ext = "fit"
+async def download_and_generate(account, password, is_cn, only_run, file_type):
+    folder = FOLDER_DICT[file_type]
     downloaded_ids = get_downloaded_ids(folder)
     coros = Coros(account, password, is_cn)
     await coros.init()
-    activity_ids, idNames = await coros.fetch_activity_ids(only_run=only_run)
+    activity_infos, idNames = await coros.fetch_activity_ids_types(only_run=only_run)
+    activity_ids = [i[0] for i in activity_infos]
+    activity_types = [i[1] for i in activity_infos]
+    activity_id_type_dict = dict(zip(activity_ids, activity_types))
     print("activity_ids: ", len(activity_ids))
     print("downloaded_ids: ", len(downloaded_ids))
     to_generate_coros_ids = list(set(activity_ids) - set(downloaded_ids))
@@ -156,11 +166,16 @@ async def download_and_generate(account, password, is_cn=False, only_run=False):
     start_time = time.time()
     await gather_with_concurrency(
         10,
-        [coros.download_activity(label_d) for label_d in to_generate_coros_ids],
+        [
+            coros.download_activity(
+                label_id, activity_id_type_dict[label_id], file_type
+            )
+            for label_id in to_generate_coros_ids
+        ],
     )
     print(f"Download finished. Elapsed {time.time() - start_time} seconds")
     await coros.req.aclose()
-    make_activities_file(SQL_FILE, folder, JSON_FILE, ext, idNames)
+    make_activities_file(SQL_FILE, folder, JSON_FILE, file_type, idNames)
 
 
 async def gather_with_concurrency(n, tasks):
@@ -185,6 +200,23 @@ if __name__ == "__main__":
         action="store_true",
         help="if is only for running",
     )
+
+    parser.add_argument(
+        "--tcx",
+        dest="download_file_type",
+        action="store_const",
+        const="tcx",
+        default="fit",
+        help="to download personal documents or ebook",
+    )
+    parser.add_argument(
+        "--gpx",
+        dest="download_file_type",
+        action="store_const",
+        const="gpx",
+        default="fit",
+        help="to download personal documents or ebook",
+    )
     options = parser.parse_args()
 
     parser.add_argument(
@@ -197,8 +229,12 @@ if __name__ == "__main__":
     account = options.account
     password = options.password
     is_only_running = options.only_run
+    file_type = options.download_file_type
+    file_type = file_type if file_type in ["gpx", "tcx", "fit"] else "fit"
     encrypted_pwd = hashlib.md5(password.encode()).hexdigest()
 
     asyncio.run(
-        download_and_generate(account, encrypted_pwd, options.is_cn, is_only_running)
+        download_and_generate(
+            account, encrypted_pwd, options.is_cn, is_only_running, file_type
+        )
     )
