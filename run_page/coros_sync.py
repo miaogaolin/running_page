@@ -108,14 +108,20 @@ class Coros:
 
         return all_activities_ids_types, idNames
 
-    async def download_activity(self, label_id):
-        download_folder = FIT_FOLDER
+    async def download_activity(self, label_id, sport_type, file_type):
+        if sport_type == 101 and file_type == "gpx":
+            print(
+                f"Sport type {sport_type} is not supported in {file_type} file. The activity will be ignored"
+            )
+            return
+        download_folder = FOLDER_DICT[file_type]
         dictName = "DOWNLOAD_URL"
         if self.is_cn:
             dictName = "DOWNLOAD_URL_CN"
-        fileType = 4
-        download_url = f"{COROS_URL_DICT.get(dictName)}?labelId={label_id}&sportType=100&fileType={fileType}"
-
+        download_url = (
+            f"{COROS_URL_DICT.get(dictName)}?labelId={label_id}&sportType={sport_type}"
+            f"&fileType={COROS_TYPE_DICT[file_type]}"
+        )
         file_url = None
         try:
             response = await self.req.post(download_url)
