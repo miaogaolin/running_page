@@ -5,7 +5,7 @@ const RunMapButtons = ({
   changeYear,
   thisYear,
 }: {
-  changeYear: (_year: string) => void;
+  changeYear: (_year: string, _typ: string) => void;
   thisYear: string;
 }) => {
   const { years } = useActivities();
@@ -21,7 +21,7 @@ const RunMapButtons = ({
             styles.button + ` ${year === thisYear ? styles.selected : ''}`
           }
           onClick={() => {
-            changeYear(year);
+            changeYear(year, "");
           }}
         >
           {year}

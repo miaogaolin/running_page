@@ -43,7 +43,7 @@ interface IRunMapProps {
   title: string;
   viewState: IViewState;
   setViewState: (_viewState: IViewState) => void;
-  changeYear: (_year: string) => void;
+  changeYear: (_year: string, _typ: string) => void;
   geoData: FeatureCollection<RPGeometry>;
   thisYear: string;
 }
