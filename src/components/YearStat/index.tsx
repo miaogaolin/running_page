@@ -21,8 +21,8 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
   let sumDistance = 0;
   let streak = 0;
   let sumElevationGain = 0;
-  let pace = 0; // eslint-disable-line no-unused-vars
-  let paceNullCount = 0; // eslint-disable-line no-unused-vars
+  let _pace = 0;
+  let _paceNullCount = 0;
   let heartRate = 0;
   let heartRateNullCount = 0;
   let totalMetersAvail = 0;
@@ -33,11 +33,11 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
     sumDistance += run.distance || 0;
     sumElevationGain += run.elevation_gain || 0;
     if (run.average_speed) {
-      pace += run.average_speed;
+      _pace += run.average_speed;
       totalMetersAvail += run.distance || 0;
       totalSecondsAvail += (run.distance || 0) / run.average_speed;
     } else {
-      paceNullCount++;
+      _paceNullCount++;
     }
     if (run.average_heartrate) {
       heartRate += run.average_heartrate;
@@ -48,8 +48,8 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
       streak = Math.max(streak, run.streak);
     }
   });
-  sumDistance = parseFloat((sumDistance / 1000.0).toFixed(2));
-  sumElevationGain = (sumElevationGain).toFixed(0);
+  sumDistance = parseFloat((sumDistance / 1000.0).toFixed(1));
+  const sumElevationGainStr = sumElevationGain.toFixed(0);
   const avgPace = formatPace(totalMetersAvail / totalSecondsAvail);
   const hasHeartRate = !(heartRate === 0);
   const avgHeartRate = (heartRate / (runs.length - heartRateNullCount)).toFixed(
@@ -65,6 +65,9 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
         {Array.from(data.entries()).map(([key, value]) => (
              <Stat value={key} description={` ${(value/1000).toFixed(2)} KM`} onClick={() => onClick(year, key)}/>
         ))}
+        {SHOW_ELEVATION_GAIN && (
+          <Stat value={sumElevationGainStr} description=" Elevation Gain" />
+        )}
         <Stat value={`${streak} day`} description=" Streak" />
       </section>
       <hr color="red" />
