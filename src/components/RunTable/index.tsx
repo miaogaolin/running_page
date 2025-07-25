@@ -21,6 +21,10 @@ interface IRunTableProperties {
 
 type SortFunc = (_a: Activity, _b: Activity) => number;
 
+
+const monthNames = [ "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December" ];
+
 const RunTable = ({
   runs,
   locateActivity,
@@ -28,6 +32,12 @@ const RunTable = ({
   runIndex,
   setRunIndex,
 }: IRunTableProperties) => {
+  let months = new Map<number, number>();
+  runs.map((run, elementIndex) => {
+    const month = Number(run.start_date_local.substring(5,7));
+    months.set(month, (months.get(month) ?? 0) + run.distance);
+  });
+
   const [sortFuncInfo, setSortFuncInfo] = useState('');
   // TODO refactor?
   const sortKMFunc: SortFunc = (a, b) =>
@@ -77,6 +87,11 @@ const RunTable = ({
 
   return (
     <div className={styles.tableContainer}>
+      <div class="mt-3 text-stone-50">
+          {Array.from([...months.keys()].sort()).map((k) => (
+            <p class="mt-1">{monthNames[k-1]}: {(months.get(k)/ 1000.0).toFixed(2)} KM</p>
+          ))}
+      </div>
       <table className={styles.runTable} cellSpacing="0" cellPadding="0">
         <thead>
           <tr>
