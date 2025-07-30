@@ -88,8 +88,8 @@ const RunTable = ({
   return (
     <div className={styles.tableContainer}>
       <div class="mt-3 text-stone-50">
-          {Array.from([...months.keys()].sort()).map((k) => (
-            <p class="mt-1">{monthNames[k-1]}: {(months.get(k)/ 1000.0).toFixed(2)} KM</p>
+          {monthNames.map((month, elementIndex) => (
+            (months.get(elementIndex+1)) && (<p class="mt-1">{month}: {(months.get(elementIndex+1)/ 1000.0).toFixed(2)} KM</p>)
           ))}
       </div>
       <table className={styles.runTable} cellSpacing="0" cellPadding="0">
