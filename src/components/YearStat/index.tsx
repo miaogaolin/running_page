@@ -58,9 +58,8 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
   return (
     <div
       className="cursor-pointer"
-      {...eventHandlers}
     >
-      <section>
+      <section {...eventHandlers}>
         <Stat value={year} description={` ${sumDistance} KM`} onClick={() => onClick(year, '')}/>
         {Array.from(data.entries()).map(([key, value]) => (
              <Stat value={key} description={` ${(value/1000).toFixed(2)} KM`} onClick={() => onClick(year, key)}/>
