@@ -453,8 +453,8 @@ const filterAndSortRuns = (
 
 const sortDateFunc = (a: Activity, b: Activity) => {
   return (
-    new Date(b.start_date_local.replace(' ', 'T')).getTime() -
-    new Date(a.start_date_local.replace(' ', 'T')).getTime()
+    new Date((b.start_date_local || '').replace(' ', 'T')).getTime() -
+    new Date((a.start_date_local || '').replace(' ', 'T')).getTime()
   );
 };
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a);
