@@ -34,8 +34,9 @@ const Index = () => {
   const intervalIdRef = useRef<number | null>(null);
   const [currentFilter, setCurrentFilter] = useState<{
     item: string;
-    func: (_run: Activity, _value: string) => boolean;
-  }>({ item: thisYear, func: filterYearRuns });
+    typ: string,
+    func: (_run: Activity, _value: string, _typ: string) => boolean;
+  }>({ item: thisYear,typ:typ, func: filterYearRuns });
 
   // State to track if we're showing a single run from URL hash
   const [singleRunId, setSingleRunId] = useState<number | null>(null);
@@ -83,7 +84,7 @@ const Index = () => {
       currentFilter.func,
       sortDateFunc
     );
-  }, [activities, currentFilter.item, currentFilter.func]);
+  }, [activities, currentFilter.item, currentFilter.typ, currentFilter.func]);
 
   const geoData = useMemo(() => {
     return geoJsonForRuns(runs);
@@ -105,13 +106,19 @@ const Index = () => {
     (
       item: string,
       name: string,
-      func: (_run: Activity, _value: string) => boolean
+      typ: string,
+      func: (_run: Activity, _value: string, _type: string) => boolean
     ) => {
       scrollToMap();
       if (name != 'Year') {
         setYear(thisYear);
       }
-      setCurrentFilter({ item, func });
+
+      if (typ != '') {
+        setType(typ);
+      }
+
+      setCurrentFilter({ item, typ, func });
       setRunIndex(-1);
       setTitle(`${item} ${name} Running Heatmap`);
     },
@@ -119,9 +126,11 @@ const Index = () => {
   );
 
   const changeYear = useCallback(
-    (y: string) => {
+    (y: string, typ: string) => {
+
       // default year
       setYear(y);
+      setType(typ);
 
       if ((viewState.zoom ?? 0) > 3 && bounds) {
         setViewState({
@@ -129,7 +138,7 @@ const Index = () => {
         });
       }
 
-      changeByItem(y, 'Year', filterYearRuns);
+      changeByItem(y, 'Year', typ, filterYearRuns);
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
         intervalIdRef.current = null;
@@ -140,14 +149,14 @@ const Index = () => {
 
   const changeCity = useCallback(
     (city: string) => {
-      changeByItem(city, 'City', filterCityRuns);
+      changeByItem(city, 'City', '', filterCityRuns);
     },
     [changeByItem]
   );
 
   const changeTitle = useCallback(
     (title: string) => {
-      changeByItem(title, 'Title', filterTitleRuns);
+      changeByItem(title, 'Title', '', filterTitleRuns);
     },
     [changeByItem]
   );

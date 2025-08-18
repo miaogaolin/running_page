@@ -14,9 +14,8 @@ const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string, _t
   // lazy Component
   const YearSVG = lazy(() => loadSvgComponent(yearStats, `./year_${year}.svg`));
 
-  let activityType = '';
   if (years.includes(year)) {
-    runs = runs.filter((run) =>filterYearRuns(run, year, activityType) );
+    runs = runs.filter((run) =>filterYearRuns(run, year, '') );
   }
   let sumDistance = 0;
   let streak = 0;

@@ -8,7 +8,7 @@ const YearsStat = ({
   onClick,
 }: {
   year: string;
-  onClick: (_year: string) => void;
+  onClick: (_year: string, _type: string) => void;
 }) => {
   const { years } = useActivities();
 
