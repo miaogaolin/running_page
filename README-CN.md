@@ -123,7 +123,7 @@ R.I.P. 希望大家都能健康顺利的跑过终点，逝者安息。
 | [Shuqi](https://github.com/zhufengme)             | <https://runner-shuqi.devlink.cn/>             | Garmin      |
 | [shugoal](https://github.com/shugoal)             | <https://shugoal.github.io/wk-shu/>            | Garmin      |
 | [Bolyn](https://run.wbolyn.com)                | <https://run.wbolyn.com>     | Coros      |
-
+| [LeiChen](https://github.com/xthirty77)                | <https://xthirty77.github.io/running_page/>     | Coros      |
 </details>
 
 ## 它是怎么工作的
@@ -173,6 +173,8 @@ R.I.P. 希望大家都能健康顺利的跑过终点，逝者安息。
 - **[Strava_to_Garmin(Using Strava Run, Garmin backup data)](#strava_to_garmin)**
 - **[Coros 高驰](#coros-高驰)**
 - **[iGPSPORT迹驰](#igpsport)**
+- **[Komoot](#komoot)**
+- **[Onelap](#onelap)**
 
 ## 视频教程
 
@@ -938,10 +940,10 @@ python run_page/nike_to_strava_sync.py eyJhbGciThiMTItNGIw******  xxx xxx xxx
 
 </details>
 
-### Coros 高驰
+### COROS 高驰
 
 <details>
-<summary>获取您的 Coros 高驰 数据</summary>
+<summary>获取您的 COROS 高驰 数据</summary>
 
 <br>
 
@@ -1006,6 +1008,32 @@ python run_page/keep_to_strava_sync.py ${your mobile} ${your password} ${client_
    ```yaml
    RUN_TYPE: keep_to_strava_sync
    ```
+
+</details>
+
+### Komoot
+
+<details>
+<summary>获取您的 Komoot 数据</summary>
+
+#### 在终端中输入以下命令
+
+```bash
+python3 run_page/komoot_sync.py 'your komoot email' 'password' --with-gpx
+```
+
+</details>
+
+### Onelap
+
+<details>
+<summary>获取您的迈金顽鹿数据</summary>
+
+#### 在终端中输入以下命令
+
+```bash
+python3 run_page/onelap_sync.py 'your onelap phone' 'password' --with-fit
+```
 
 </details>
 
